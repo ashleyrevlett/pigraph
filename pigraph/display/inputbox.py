@@ -1,67 +1,42 @@
-# by Timothy Downs, inputbox written for my map editor
-
-# This program needs a little cleaning up
+# based on code by Timothy Downs
+# refactored by ar to be class based
 # It ignores the shift key
 # And, for reasons of my own, this program converts "-" to "_"
-
-# A program to get user input, allowing backspace etc
-# shown in a box in the middle of the screen
+# allows backspace
 # Called by:
 # import inputbox
-# answer = inputbox.ask(screen, "Your name")
-#
-# Only near the center of the screen is blitted to
+# box = inputbox.inputbox(screen, "Question", x, y, width, height)
+# answer = box.ask()
+
 
 import pygame, pygame.font, pygame.event, pygame.draw, string
 from pygame.locals import *
 
+from button import *
+
 class InputBox:
 
+	def __init__(self, question, x, y, width, height):
+		if not pygame.font.get_init():
+		  pygame.font.init()
+		self.question = question
+		self.x = x
+		self.y = y
+		self.width = width
+		self.height = height
+		self.screen = pygame.display.get_surface()
+		self.question = question
+		self.button = Button("Go", self.x+40, self.y, 30, self.height)
+		self.current_message = self.question + ": "
+		self.fontobject = pygame.font.Font(None,18)
 
-def get_key():
-  while 1:
-    event = pygame.event.poll()
-    if event.type == KEYDOWN:
-      return event.key
-    else:
-      pass
 
-def display_box(screen, message, xpos, ypos):
-  "Print a message in a box on the screen"
-  fontobject = pygame.font.Font(None,18)
-  pygame.draw.rect(screen, (0,0,0),
-                   (xpos - 100,
-                    ypos - 10,
-                    200,20), 0)
-  pygame.draw.rect(screen, (255,255,255),
-                   (xpos - 102,
-                   ypos - 12,
-                    204,24), 1)
-  if len(message) != 0:
-    screen.blit(fontobject.render(message, 1, (255,255,255)),
-                ((screen.get_width() / 2) - 100, (screen.get_height() / 2) - 10))
-  pygame.display.flip()
+	def display_box(self, screen):
+		""" called by on_render """		
+		pygame.draw.rect(screen, (255,255,255), (self.x - self.width, self.y - self.height,
+						self.width,self.height), 0)
+		if len(self.current_message) != 0:
+			screen.blit(self.fontobject.render(self.current_message, 1, (60,60,60)),
+						(self.x - self.width, self.y - self.height))		
+		self.button.display_box(screen)
 
-def ask(screen, question):
-  "ask(screen, question) -> answer"
-  pygame.font.init()
-  current_string = []
-  display_box(screen, question + ": " + string.join(current_string,""), (screen.get_width() / 2), (screen.get_height() / 2))
-  while 1:
-    inkey = get_key()
-    if inkey == K_BACKSPACE:
-      current_string = current_string[0:-1]
-    elif inkey == K_RETURN:
-      break
-    elif inkey == K_MINUS:
-      current_string.append("_")
-    elif inkey <= 127:
-      current_string.append(chr(inkey))
-    display_box(screen, question + ": " + string.join(current_string,""), (screen.get_width() / 2), (screen.get_height() / 2))
-  return string.join(current_string,"")
-
-def main():
-  screen = pygame.display.get_surface()
-  print ask(screen, "Name") + " was entered"
-
-if __name__ == '__main__': main()

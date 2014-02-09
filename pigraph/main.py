@@ -6,7 +6,7 @@ from igraph import *
 
 from display.colors import *
 from display.node import *
-# from display.inputbox import *
+from display.inputbox import *
 
 class App:
     """
@@ -23,8 +23,10 @@ class App:
         self.nodes = []
         self.margin = 20
         self.filename = filename
-        self.graph_layout = graph_layout
-
+        self.graph_layout = graph_layout        
+        self.inputbox = InputBox("Search", self.margin+200, self.height - (self.margin+20), 200, 20 )
+        self.btn_rect = self.inputbox.button.rect
+        print self.btn_rect
 
     def on_init(self):
         pygame.init()
@@ -33,11 +35,11 @@ class App:
         self._running = True
         print "App initialized, window size: ", self.width, self.height
 
-        # draw input box
-        # query = inputbox.ask(self.screen, "Search")
-        # print query
-
+        self.screen.fill(gray)
+        pygame.display.flip()
+        
         try:
+            print "loading ", self.filename
             self.graph = load(self.filename)
         except:
             print "Couldn't load data file"
@@ -61,10 +63,20 @@ class App:
             print "App quitting"
             self._running = False
         elif event.type == KEYDOWN:
+            if event.key == K_BACKSPACE:
+                self.inputbox.current_message = self.inputbox.current_message[0:-1]
+            elif event.key == K_RETURN:
+                pass
+            elif event.key <= 127:
+                self.inputbox.current_message = self.inputbox.current_message + chr(event.key)
             if event.key == K_ESCAPE:
                 self._running = False
-
-
+        elif event.type == MOUSEBUTTONUP and event.button == 1:
+            x,y = event.pos
+            print "You released the left mouse button at (%d, %d)" % event.pos      
+            if self.btn_rect.collidepoint(x, y):
+                print "You clicked inside the box"
+       
     def on_render(self):
         self.clock.tick(30)
         pygame.display.set_caption("fps: " + str(self.clock.get_fps()))
@@ -80,6 +92,7 @@ class App:
         for node in self.nodes:
             node.update()
             pygame.draw.ellipse(self.screen, blue, node.rect )            
+        self.inputbox.display_box(self.screen)
         pygame.display.flip()
 
 
