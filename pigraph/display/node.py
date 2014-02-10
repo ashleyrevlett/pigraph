@@ -30,8 +30,8 @@ class Node(pygame.sprite.Sprite):
         self.speedY = 0 # speed in y direction
         self.normal_friction = .9 # friction while accelerating; lower = less springiness
         self.slowing_friction = .3 # friction while slowing down; lower = slows down faster
-        self.index = index # used to access edgesequence
-        self.target = None # starts off with no target
+        self.index = index # used to access edgesequence and vsequence
+        self.target = None # starts off with no target        
 
     def get_direction(self, target):
         '''

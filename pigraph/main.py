@@ -69,8 +69,21 @@ class App:
             d_y = max(0, min(self.nodes[dest_idx].trueY, self.height)) 
             pygame.draw.line( self.screen, medgray, (s_x, s_y), (d_x, d_y) )  
         for node in self.nodes:
-            node.update()
-            pygame.draw.ellipse(self.screen, blue, node.rect )            
+            node.update()        
+            x = node.trueX
+            y = node.trueY
+            level = self.graph.ig.vs[node.index]["level"]
+            degree = self.graph.ig.degree(node.index)
+            color = node.get_node_color(level)            
+            pygame.draw.ellipse(self.screen, color, node.rect )            
+
+            font_size = 9 + degree
+            thisfont = pygame.font.SysFont('Arial', font_size)  
+            label = thisfont.render(self.graph.ig.vs[node.index]['label'], 1, white)    
+            label_x = int(max(min(x, self.width), 0))
+            label_y = int(max(min(y, self.height), 0))        
+            self.screen.blit(label, (label_x, label_y))    
+
         self.inputbox.display_box(self.screen)
         pygame.display.flip()
 
