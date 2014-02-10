@@ -7,7 +7,7 @@ from display.node import *
 from display.gui import *
 from pigraph.pigraph import *
 
-
+FULLSCREEN = False
 
 class App:
     """
@@ -16,9 +16,14 @@ class App:
         """
 
     def __init__(self, width, height, graph_layout, filename):
-        self._running = True
-        self.screen = True
+        # globals
         self.size = self.width, self.height = width, height
+        if FULLSCREEN:
+            self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF )
+            self.size = self.width, self.height = self.screen.get_size()
+        else:
+            self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)            
+        self._running = True
         self.clock = pygame.time.Clock()
         self.nodes = []
         self.margin = 20
@@ -29,9 +34,8 @@ class App:
 
     def on_init(self):
         pygame.init()
-        self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
         self.gui = Gui(self.screen)
-        self.graph = PiGraph(self.graph_layout, self.width, self.height, self.margin, filename=self.filename)        
+        self.graph = PiGraph(self.graph_layout, self.width, self.height-50, self.margin, filename=self.filename)        
         self._running = True
         self.screen.fill(gray)
         pygame.display.flip()
@@ -46,6 +50,8 @@ class App:
                     self.gui.inputbox.current_message = self.gui.inputbox.current_message[0:-1]
                 if self.gui.depthbox.has_focus:                    
                     self.gui.depthbox.current_message = self.gui.depthbox.current_message[0:-1]
+                if self.gui.levelsbox.has_focus:                    
+                    self.gui.levelsbox.current_message = self.gui.levelsbox.current_message[0:-1]                    
             elif event.key == K_RETURN:
                 pass
             elif event.key <= 127:
@@ -53,6 +59,8 @@ class App:
                     self.gui.inputbox.current_message = self.gui.inputbox.current_message + chr(event.key)
                 if self.gui.depthbox.has_focus:                    
                     self.gui.depthbox.current_message = self.gui.depthbox.current_message + chr(event.key)                                    
+                if self.gui.levelsbox.has_focus:                    
+                    self.gui.levelsbox.current_message = self.gui.levelsbox.current_message + chr(event.key)                                                        
             if event.key == K_ESCAPE:
                 self._running = False
         elif event.type == MOUSEBUTTONUP and event.button == 1:
@@ -62,16 +70,27 @@ class App:
                 print "You clicked inside the input box"
                 self.gui.inputbox.has_focus = True
                 self.gui.depthbox.has_focus = False
+                self.gui.levelsbox.has_focus = False
             elif self.gui.depthbox.rect.collidepoint(x,y):
                 print "You clicked inside the depthbox box"
                 self.gui.inputbox.has_focus = False
                 self.gui.depthbox.has_focus = True
+                self.gui.levelsbox.has_focus = False
+            elif self.gui.levelsbox.rect.collidepoint(x,y):
+                print "You clicked inside the depthbox box"
+                self.gui.inputbox.has_focus = False
+                self.gui.depthbox.has_focus = False
+                self.gui.levelsbox.has_focus = True
             elif self.gui.btn_rect.collidepoint(x, y):
                 print "You clicked inside the button"
                 self.gui.inputbox.has_focus = False
                 self.gui.depthbox.has_focus = False
+                self.gui.levelsbox.has_focus = False
                 del self.graph
-                self.graph = PiGraph(self.graph_layout, self.width, self.height, self.margin, depth=int(self.gui.depthbox.current_message), keyword=self.gui.inputbox.current_message)
+                self.graph = PiGraph(self.graph_layout, self.width, self.height, self.margin, 
+                                    depth=int(self.gui.depthbox.current_message), 
+                                    levels=int(self.gui.levelsbox.current_message), 
+                                    keyword=self.gui.inputbox.current_message)
                 self.nodes = self.graph.find_nodes()
 
 
@@ -92,8 +111,9 @@ class App:
             y = node.trueY
             level = self.graph.ig.vs[node.index]["level"]
             degree = self.graph.ig.degree(node.index)
-            color = node.get_node_color(level)            
-            pygame.draw.ellipse(self.screen, color, node.rect )            
+            color = node.get_node_color(level)      
+            rect = node.get_node_size(degree)
+            pygame.draw.ellipse(self.screen, color, rect)
 
             font_size = 9 + degree
             thisfont = pygame.font.SysFont('Arial', font_size)  

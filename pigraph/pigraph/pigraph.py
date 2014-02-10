@@ -6,7 +6,6 @@ from network.network import *
 from display.node import *
 
 
-blacklist = ['disambiguation', 'note-', 'Template', 'edit', ':', 'commons' ]
 
 
 class PiGraph:
@@ -15,7 +14,7 @@ class PiGraph:
             Main Application draws graph animation
         """
 
-    def __init__(self, graph_layout, width, height, margin, depth=3, keyword=None, filename=None):
+    def __init__(self, graph_layout, width, height, margin, depth=3, levels=3, keyword=None, filename=None):
         self.ig = Graph()
         self.ig_layout = graph_layout
         self.width = width
@@ -25,6 +24,7 @@ class PiGraph:
         self.network = Network()
         self.filename = filename
         self.depth = depth
+        self.levels = levels
   
 
     def add_vertex_with_attrs(self, attrs):
@@ -51,33 +51,31 @@ class PiGraph:
             print "added vertice 0, " + label
             # levels > 0
             prev_level_start = 0
-            for level in range(1, self.depth):
+            for level in range(1, self.levels):
                 prev_level_end = self.ig.vcount()
                 for i in range(prev_level_start, prev_level_end):       
                     parent_label = self.ig.vs[i]["label"]           
                     child_links = self.network.get_links_from_url(self.ig.vs[i]["href"])
-                    link_count = 0
-                    for link in child_links:
-                        if link_count < self.depth and not any(word in link['href'] for word in blacklist):
-                            label = link['href'][6:40].lower().replace('_', ' ')
-                            try:
-                                node = self.ig.vs.find(label)
-                                self.ig.add_edges( [(i,node)] )
-                                print "Repeated node: ", label, ", adding edge (", i, node.index, ")"
-                            except ValueError:                                      
-                                # add node to graph, add edge to parent
-                                attr = { "name": label, 
-                                        "label": label, 
-                                        "level": level, 
-                                        "href":'http://en.wikipedia.org' + link['href']
-                                        }
-                                self.add_vertex_with_attrs(attr)                   
-                                idx = self.ig.vcount()-1
-                                self.ig.add_edges( [ (i, idx)] )
-                                print "New node: " + label + ", index: " + str(idx) + ", edge ( "+ str(i) +", " + str(idx) + " )"                   
-                            link_count += 1 
+                    for link in child_links[:self.depth]:                    
+                        label = link['href'][6:40].lower().replace('_', ' ')
+                        try:
+                            node = self.ig.vs.find(label)
+                            self.ig.add_edges( [(i,node)] )
+                            print "Repeated node: ", label, ", adding edge (", i, node.index, ")"
+                        except ValueError:                                      
+                            # add node to graph, add edge to parent
+                            attr = { "name": label, 
+                                    "label": label, 
+                                    "level": level, 
+                                    "href":'http://en.wikipedia.org' + link['href']
+                                    }
+                            self.add_vertex_with_attrs(attr)                   
+                            idx = self.ig.vcount()-1
+                            self.ig.add_edges( [ (i, idx)] )
+                            print "New node: " + label + ", index: " + str(idx) + ", edge ( "+ str(i) +", " + str(idx) + " )"                   
                 prev_level_start = prev_level_end
                 prev_level_end = self.ig.vcount()
+                self.depth = max(1, self.depth-1)
 
 
     def find_nodes(self):   

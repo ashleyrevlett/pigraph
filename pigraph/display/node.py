@@ -131,4 +131,7 @@ class Node(pygame.sprite.Sprite):
             color = blue        
         return color
             
+    def get_node_size(self, degree):
+        self.rect = Rect(self.trueX-degree*2, self.trueY-degree*2, (self.radius*2)+degree*2, (self.radius*2)+degree*2)
+        return self.rect
  
