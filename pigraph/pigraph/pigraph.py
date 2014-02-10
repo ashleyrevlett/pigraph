@@ -6,8 +6,6 @@ from network.network import *
 from display.node import *
 
 
-LEVELS = 4
-DEPTH = 3
 blacklist = ['disambiguation', 'note-', 'Template', 'edit', ':', 'commons' ]
 
 
@@ -17,7 +15,7 @@ class PiGraph:
             Main Application draws graph animation
         """
 
-    def __init__(self, graph_layout, width, height, margin, keyword=None, filename=None):
+    def __init__(self, graph_layout, width, height, margin, depth=3, keyword=None, filename=None):
         self.ig = Graph()
         self.ig_layout = graph_layout
         self.width = width
@@ -26,6 +24,7 @@ class PiGraph:
         self.keyword = keyword
         self.network = Network()
         self.filename = filename
+        self.depth = depth
   
 
     def add_vertex_with_attrs(self, attrs):
@@ -52,14 +51,14 @@ class PiGraph:
             print "added vertice 0, " + label
             # levels > 0
             prev_level_start = 0
-            for level in range(1, LEVELS):
+            for level in range(1, self.depth):
                 prev_level_end = self.ig.vcount()
                 for i in range(prev_level_start, prev_level_end):       
                     parent_label = self.ig.vs[i]["label"]           
                     child_links = self.network.get_links_from_url(self.ig.vs[i]["href"])
                     link_count = 0
                     for link in child_links:
-                        if link_count < DEPTH and not any(word in link['href'] for word in blacklist):
+                        if link_count < self.depth and not any(word in link['href'] for word in blacklist):
                             label = link['href'][6:40].lower().replace('_', ' ')
                             try:
                                 node = self.ig.vs.find(label)

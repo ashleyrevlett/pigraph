@@ -42,20 +42,36 @@ class App:
             self._running = False
         elif event.type == KEYDOWN:
             if event.key == K_BACKSPACE:
-                self.gui.inputbox.current_message = self.gui.inputbox.current_message[0:-1]
+                if self.gui.inputbox.has_focus:
+                    self.gui.inputbox.current_message = self.gui.inputbox.current_message[0:-1]
+                if self.gui.depthbox.has_focus:                    
+                    self.gui.depthbox.current_message = self.gui.depthbox.current_message[0:-1]
             elif event.key == K_RETURN:
                 pass
             elif event.key <= 127:
-                self.gui.inputbox.current_message = self.gui.inputbox.current_message + chr(event.key)
+                if self.gui.inputbox.has_focus:
+                    self.gui.inputbox.current_message = self.gui.inputbox.current_message + chr(event.key)
+                if self.gui.depthbox.has_focus:                    
+                    self.gui.depthbox.current_message = self.gui.depthbox.current_message + chr(event.key)                                    
             if event.key == K_ESCAPE:
                 self._running = False
         elif event.type == MOUSEBUTTONUP and event.button == 1:
             x,y = event.pos
-            print "You released the left mouse button at (%d, %d)" % event.pos      
-            if self.gui.btn_rect.collidepoint(x, y):
-                print "You clicked inside the box"
+            print "You released the left mouse button at (%d, %d)" % event.pos   
+            if self.gui.inputbox.rect.collidepoint(x,y):
+                print "You clicked inside the input box"
+                self.gui.inputbox.has_focus = True
+                self.gui.depthbox.has_focus = False
+            elif self.gui.depthbox.rect.collidepoint(x,y):
+                print "You clicked inside the depthbox box"
+                self.gui.inputbox.has_focus = False
+                self.gui.depthbox.has_focus = True
+            elif self.gui.btn_rect.collidepoint(x, y):
+                print "You clicked inside the button"
+                self.gui.inputbox.has_focus = False
+                self.gui.depthbox.has_focus = False
                 del self.graph
-                self.graph = PiGraph(self.graph_layout, self.width, self.height, self.margin, keyword=self.gui.inputbox.current_message)
+                self.graph = PiGraph(self.graph_layout, self.width, self.height, self.margin, depth=int(self.gui.depthbox.current_message), keyword=self.gui.inputbox.current_message)
                 self.nodes = self.graph.find_nodes()
 
 
@@ -86,7 +102,7 @@ class App:
             label_y = int(max(min(y, self.height), 0))        
             self.screen.blit(label, (label_x, label_y))    
 
-        self.gui.inputbox.display_box(self.screen)
+        self.gui.draw_display(self.screen)
         pygame.display.flip()
 
 

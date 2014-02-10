@@ -12,7 +12,6 @@
 import pygame, pygame.font, pygame.event, pygame.draw, string
 from pygame.locals import *
 
-from button import *
 
 class InputBox:
 
@@ -25,11 +24,12 @@ class InputBox:
 		self.width = width
 		self.height = height
 		self.screen = pygame.display.get_surface()
-		self.question = question
-		self.button = Button("Go", self.x+50, self.y, 30, self.height)
+		self.question = question		
 		self.current_message = ""
 		self.fontobject = pygame.font.SysFont('Arial', 12)
 		self.label = self.fontobject.render(self.question, 1, (255,255,255))
+		self.rect = Rect(x-width, y-height, width, height)
+		self.has_focus = False
 
 
 	def display_box(self, screen):
@@ -42,5 +42,4 @@ class InputBox:
 		if len(self.current_message) != 0:
 			screen.blit(self.fontobject.render(self.current_message, 1, (60,60,60)),
 						(self.x - self.width + self.fontobject.size(self.question)[0] + 15, self.y - self.height + 3))
-		self.button.display_box(screen)
-
+		
