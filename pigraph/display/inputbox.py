@@ -28,8 +28,9 @@ class InputBox:
 		self.question = question
 		self.button = Button("Go", self.x+50, self.y, 30, self.height)
 		self.current_message = ""
-		self.fontobject = pygame.font.Font(None,18)
-		self.label = self.fontobject.render(self.question, 1, (200,200,20))
+		self.fontobject = pygame.font.SysFont('Arial', 12)
+		self.label = self.fontobject.render(self.question, 1, (255,255,255))
+
 
 	def display_box(self, screen):
 		""" called by on_render """	

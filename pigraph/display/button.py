@@ -15,7 +15,7 @@ class Button:
 		self.height = height
 		self.text = text
 		self.padding = 3
-		self.fontobject = pygame.font.Font(None,18)
+		self.fontobject = pygame.font.SysFont('Arial', 12)
 		self.rect = Rect(x-width, y-height, width, height)
 
 	def display_box(self, screen):

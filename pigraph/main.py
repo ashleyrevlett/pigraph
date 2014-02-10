@@ -4,8 +4,9 @@ from igraph import *
 
 from display.colors import *
 from display.node import *
-from display.inputbox import *
+from display.gui import *
 from pigraph.pigraph import *
+
 
 
 class App:
@@ -23,13 +24,14 @@ class App:
         self.margin = 20
         self.filename = filename
         self.graph_layout = graph_layout
-        self.inputbox = InputBox("Search", self.margin+200, self.height - (self.margin), 200, 20 )
-        self.btn_rect = self.inputbox.button.rect
-        self.graph = PiGraph(self.graph_layout, self.width, self.height, self.margin, filename=self.filename)        
+        self.gui = True
+        self.graph = True
 
     def on_init(self):
         pygame.init()
         self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
+        self.gui = Gui(self.screen)
+        self.graph = PiGraph(self.graph_layout, self.width, self.height, self.margin, filename=self.filename)        
         self._running = True
         self.screen.fill(gray)
         pygame.display.flip()
@@ -40,20 +42,20 @@ class App:
             self._running = False
         elif event.type == KEYDOWN:
             if event.key == K_BACKSPACE:
-                self.inputbox.current_message = self.inputbox.current_message[0:-1]
+                self.gui.inputbox.current_message = self.gui.inputbox.current_message[0:-1]
             elif event.key == K_RETURN:
                 pass
             elif event.key <= 127:
-                self.inputbox.current_message = self.inputbox.current_message + chr(event.key)
+                self.gui.inputbox.current_message = self.gui.inputbox.current_message + chr(event.key)
             if event.key == K_ESCAPE:
                 self._running = False
         elif event.type == MOUSEBUTTONUP and event.button == 1:
             x,y = event.pos
             print "You released the left mouse button at (%d, %d)" % event.pos      
-            if self.btn_rect.collidepoint(x, y):
+            if self.gui.btn_rect.collidepoint(x, y):
                 print "You clicked inside the box"
                 del self.graph
-                self.graph = PiGraph(self.graph_layout, self.width, self.height, self.margin, keyword=self.inputbox.current_message)
+                self.graph = PiGraph(self.graph_layout, self.width, self.height, self.margin, keyword=self.gui.inputbox.current_message)
                 self.nodes = self.graph.find_nodes()
 
 
@@ -84,7 +86,7 @@ class App:
             label_y = int(max(min(y, self.height), 0))        
             self.screen.blit(label, (label_x, label_y))    
 
-        self.inputbox.display_box(self.screen)
+        self.gui.inputbox.display_box(self.screen)
         pygame.display.flip()
 
 

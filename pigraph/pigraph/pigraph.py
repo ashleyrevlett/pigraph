@@ -6,7 +6,7 @@ from network.network import *
 from display.node import *
 
 
-LEVELS = 3
+LEVELS = 4
 DEPTH = 3
 blacklist = ['disambiguation', 'note-', 'Template', 'edit', ':', 'commons' ]
 
