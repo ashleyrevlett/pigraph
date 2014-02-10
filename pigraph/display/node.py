@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 from vector import *
+from display.colors import *
 
 
 class Node(pygame.sprite.Sprite):
@@ -114,5 +115,20 @@ class Node(pygame.sprite.Sprite):
             self.trueY += self.speedY
             self.rect.center = ( round(self.trueX), round(self.trueY) ) # apply values to sprite.center
 
-                    
+ 
+    def get_node_color(self, level):
+        """ returns rgb color constant based on level """
+        color = medgray
+        if level == 0:
+            color = red
+        elif level == 1:
+            color = orange
+        elif level == 2:
+            color = yellow
+        elif level == 3:
+            color = green
+        elif level == 4:
+            color = blue        
+        return color
+            
  

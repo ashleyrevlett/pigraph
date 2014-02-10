@@ -1,5 +1,3 @@
-import random
-
 import pygame
 from pygame.locals import *
 from igraph import *
@@ -7,6 +5,8 @@ from igraph import *
 from display.colors import *
 from display.node import *
 from display.inputbox import *
+from pigraph.pigraph import *
+
 
 class App:
     """
@@ -19,44 +19,20 @@ class App:
         self.screen = True
         self.size = self.width, self.height = width, height
         self.clock = pygame.time.Clock()
-        self.graph = Graph()
         self.nodes = []
         self.margin = 20
         self.filename = filename
-        self.graph_layout = graph_layout        
-        self.inputbox = InputBox("Search", self.margin+200, self.height - (self.margin+20), 200, 20 )
+        self.graph_layout = graph_layout
+        self.inputbox = InputBox("Search", self.margin+200, self.height - (self.margin), 200, 20 )
         self.btn_rect = self.inputbox.button.rect
-        print self.btn_rect
+        self.graph = PiGraph(self.graph_layout, self.width, self.height, self.margin, filename=self.filename)        
 
     def on_init(self):
         pygame.init()
-        self.screen = pygame.display.set_mode(self.size, 
-                             pygame.HWSURFACE | pygame.DOUBLEBUF)
+        self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
         self._running = True
-        print "App initialized, window size: ", self.width, self.height
-
         self.screen.fill(gray)
         pygame.display.flip()
-        
-        try:
-            print "loading ", self.filename
-            self.graph = load(self.filename)
-        except:
-            print "Couldn't load data file"
-            self._running = False
-            return
-
-        l = self.graph.layout(self.graph_layout)
-        l.fit_into( BoundingBox(self.width-(self.margin*2), self.height-(self.margin*2)) )
-        self.graph.vs["coords"] = l.coords
-        
-        for i, v in enumerate(self.graph.vs):
-            xpos = random.randrange(self.margin, self.width-self.margin, 1)
-            ypos = random.randrange(self.margin, self.height-self.margin, 1)
-            node = Node(i, xpos, ypos)
-            node.target = ( round(self.graph.vs[i]["coords"][0])+self.margin, round(self.graph.vs[i]["coords"][1])+self.margin )
-            self.nodes.append(node)
-            
 
     def on_event(self, event):
         if event.type == pygame.QUIT:
@@ -76,12 +52,15 @@ class App:
             print "You released the left mouse button at (%d, %d)" % event.pos      
             if self.btn_rect.collidepoint(x, y):
                 print "You clicked inside the box"
-       
+                del self.graph
+                self.graph = PiGraph(self.graph_layout, self.width, self.height, self.margin, keyword=self.inputbox.current_message)
+                self.nodes = self.graph.find_nodes()
+
+
     def on_render(self):
-        self.clock.tick(30)
         pygame.display.set_caption("fps: " + str(self.clock.get_fps()))
         self.screen.fill(gray)
-        for e in self.graph.es:        
+        for e in self.graph.ig.es:        
             src_idx = e.source
             dest_idx = e.target
             s_x = max(0, min(self.nodes[src_idx].trueX, self.width)) 
@@ -109,7 +88,7 @@ class App:
 
 
     def on_loop(self):
-        pass
+        self.clock.tick(30)
 
 
     def on_cleanup(self):
