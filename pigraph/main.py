@@ -46,42 +46,27 @@ class App:
             self._running = False
         elif event.type == KEYDOWN:
             if event.key == K_BACKSPACE:
-                if self.gui.inputbox.has_focus:
-                    self.gui.inputbox.current_message = self.gui.inputbox.current_message[0:-1]
-                if self.gui.depthbox.has_focus:                    
-                    self.gui.depthbox.current_message = self.gui.depthbox.current_message[0:-1]
-                if self.gui.levelsbox.has_focus:                    
-                    self.gui.levelsbox.current_message = self.gui.levelsbox.current_message[0:-1]                    
+                for box in self.gui.inputboxes:
+                    if box.has_focus:
+                        box.current_message = box.current_message[0:-1]
             elif event.key == K_RETURN:
                 pass
             elif event.key <= 127:
-                if self.gui.inputbox.has_focus:
-                    self.gui.inputbox.current_message = self.gui.inputbox.current_message + chr(event.key)
-                if self.gui.depthbox.has_focus:                    
-                    self.gui.depthbox.current_message = self.gui.depthbox.current_message + chr(event.key)                                    
-                if self.gui.levelsbox.has_focus:                    
-                    self.gui.levelsbox.current_message = self.gui.levelsbox.current_message + chr(event.key)                                                        
+                for box in self.gui.inputboxes:
+                    if box.has_focus:
+                        box.current_message = box.current_message + chr(event.key)
             if event.key == K_ESCAPE:
                 self._running = False
         elif event.type == MOUSEBUTTONUP and event.button == 1:
             x,y = event.pos
             print "You released the left mouse button at (%d, %d)" % event.pos   
-            if self.gui.inputbox.rect.collidepoint(x,y):
-                print "You clicked inside the input box"
-                self.gui.inputbox.has_focus = True
-                self.gui.depthbox.has_focus = False
-                self.gui.levelsbox.has_focus = False
-            elif self.gui.depthbox.rect.collidepoint(x,y):
-                print "You clicked inside the depthbox box"
-                self.gui.inputbox.has_focus = False
-                self.gui.depthbox.has_focus = True
-                self.gui.levelsbox.has_focus = False
-            elif self.gui.levelsbox.rect.collidepoint(x,y):
-                print "You clicked inside the depthbox box"
-                self.gui.inputbox.has_focus = False
-                self.gui.depthbox.has_focus = False
-                self.gui.levelsbox.has_focus = True
-            elif self.gui.btn_rect.collidepoint(x, y):
+            for box in self.gui.inputboxes:
+                if box.rect.collidepoint(x,y):
+                    print "You clicked inside the box: ", box.question
+                    for b in self.gui.inputboxes:
+                        b.has_focus = False
+                    box.has_focus = True                
+            if self.gui.btn_rect.collidepoint(x, y):
                 print "You clicked inside the button"
                 self.gui.inputbox.has_focus = False
                 self.gui.depthbox.has_focus = False
