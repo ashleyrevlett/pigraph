@@ -64,7 +64,7 @@ class PiGraph:
                             print "Repeated node: ", label, ", adding edge (", i, node.index, ")"
                         except ValueError:                                      
                             # add node to graph, add edge to parent
-                            attr = { "name": label, 
+                            attr = { "name": link['href'], 
                                     "label": label, 
                                     "level": level, 
                                     "href":'http://en.wikipedia.org' + link['href']
