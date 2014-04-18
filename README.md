@@ -29,3 +29,7 @@ python pigraph/main.py
 * Detail view of node information
 * Save tree for later
 * Interactive addition of new nodes
+
+**Screenshot**
+
+![pigraph screenshot](http://ashleyrevlett.github.io/pigraph/images/screenshot.png "Pigraph Screenshot")
